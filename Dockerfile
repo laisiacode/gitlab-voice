@@ -1,8 +1,8 @@
 FROM golang:1.14 as builder
+WORKDIR /src
 ADD . /src
-RUN cd /src && go build -o app
+RUN CGO_ENABLED=0 go build -o app
 
 FROM alpine
-WORKDIR /app
-COPY --from=builder /src/app /app/
-ENTRYPOINT ./app
+COPY --from=builder /src/app /bin/app
+ENTRYPOINT [ "/bin/app" ]
