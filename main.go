@@ -11,19 +11,38 @@ import (
 	"github.com/spf13/viper"
 )
 
+var bot *tgbotapi.BotAPI
+
 func envVar() {
 	viper.AutomaticEnv()
 	viper.SetEnvPrefix("BOT")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 }
 
-func run() {
-	bot, err := tgbotapi.NewBotAPI(viper.GetString("token"))
+func runBot() {
+	var err error
+	bot, err = tgbotapi.NewBotAPI(viper.GetString("token"))
 	if err != nil {
 		log.Panic("new bot ", err)
 	}
 	bot.Debug = false
 	log.Printf("Authorized on account %s", bot.Self.UserName)
+
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
+
+	updates, err := bot.GetUpdatesChan(u)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	for update := range updates {
+		fmt.Println(
+			update.Message.Chat.ID,
+			update.Message.From.String(),
+			update.Message.Text,
+		)
+	}
 }
 
 type user struct {
@@ -68,9 +87,17 @@ func server() {
 			return
 		}
 
+		if viper.GetInt64("chat.id") == 0 {
+			c.JSON(http.StatusOK, "")
+			return
+		}
+
 		switch wh.ObjectKind {
 		case "merge_request":
-			fmt.Println(fmt.Sprintf("%s %s MR %s", wh.User.Username, wh.ObjectAttributes.State, wh.ObjectAttributes.Title))
+			bot.Send(tgbotapi.NewMessage(
+				viper.GetInt64("chat.id"),
+				fmt.Sprintf("%s %s MR %s", wh.User.Username, wh.ObjectAttributes.State, wh.ObjectAttributes.Title),
+			))
 		}
 
 		c.JSON(http.StatusOK, "")
@@ -82,7 +109,6 @@ func server() {
 func main() {
 	fmt.Println("bot start")
 	envVar()
-	run()
-
+	go runBot()
 	server()
 }
