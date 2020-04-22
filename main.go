@@ -98,6 +98,8 @@ func server() {
 				viper.GetInt64("chat.id"),
 				fmt.Sprintf("%s %s MR %s", wh.User.Username, wh.ObjectAttributes.State, wh.ObjectAttributes.Title),
 			))
+		default:
+			fmt.Println("webhook", wh.ObjectKind)
 		}
 
 		c.JSON(http.StatusOK, "")
