@@ -51,8 +51,14 @@ type user struct {
 	AvatarURL string `json:"avatar_url"`
 }
 
+type project struct {
+	Path string `json:"path_with_namespace"`
+	URL  string `json:"url"`
+}
+
 type attributes struct {
 	ID     int    `json:"id"`
+	IID    int    `json:"iid"`
 	Title  string `json:"title"`
 	State  string `json:"state"`
 	URL    string `json:"url"`
@@ -63,6 +69,7 @@ type webhook struct {
 	ObjectKind string `json:"object_kind"`
 
 	User             user
+	Project          project
 	ObjectAttributes *attributes `json:"object_attributes"`
 }
 
@@ -96,7 +103,14 @@ func server() {
 		case "merge_request":
 			bot.Send(tgbotapi.NewMessage(
 				viper.GetInt64("chat.id"),
-				fmt.Sprintf("%s %s MR %s", wh.User.Username, wh.ObjectAttributes.State, wh.ObjectAttributes.Title),
+				fmt.Sprintf("%s %s MR ![%d](%s) %s at %s",
+					wh.User.Username,
+					wh.ObjectAttributes.State,
+					wh.ObjectAttributes.IID,
+					wh.ObjectAttributes.URL,
+					wh.ObjectAttributes.Title,
+					wh.Project.Path,
+				),
 			))
 		default:
 			fmt.Println("webhook", wh.ObjectKind)
