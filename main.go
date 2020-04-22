@@ -105,7 +105,7 @@ func server() {
 				viper.GetInt64("chat.id"),
 				fmt.Sprintf("%s %s MR ![%d](%s) %s at %s",
 					wh.User.Username,
-					wh.ObjectAttributes.State,
+					wh.ObjectAttributes.Action,
 					wh.ObjectAttributes.IID,
 					wh.ObjectAttributes.URL,
 					wh.ObjectAttributes.Title,
