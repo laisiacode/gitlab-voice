@@ -117,7 +117,10 @@ func server() {
 				),
 			)
 			msg.ParseMode = "MarkdownV2"
-			bot.Send(msg)
+			_, err := bot.Send(msg)
+			if err != nil {
+				fmt.Println("send message error", err)
+			}
 		default:
 			fmt.Println("webhook", wh.ObjectKind)
 		}
@@ -125,7 +128,9 @@ func server() {
 		c.JSON(http.StatusOK, "")
 	})
 
-	engine.Run()
+	if err := engine.Run(); err != nil {
+		fmt.Println("engine error", err)
+	}
 }
 
 func main() {
