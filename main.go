@@ -1,3 +1,7 @@
+//
+//
+// webhook api document:
+// https://docs.gitlab.com/ce/user/project/integrations/webhooks.html
 package main
 
 import (
@@ -101,7 +105,7 @@ func server() {
 
 		switch wh.ObjectKind {
 		case "merge_request":
-			bot.Send(tgbotapi.NewMessage(
+			msg := tgbotapi.NewMessage(
 				viper.GetInt64("chat.id"),
 				fmt.Sprintf("%s %s MR ![%d](%s) %s at %s",
 					wh.User.Username,
@@ -111,7 +115,9 @@ func server() {
 					wh.ObjectAttributes.Title,
 					wh.Project.Path,
 				),
-			))
+			)
+			msg.ParseMode = "MarkdownV2"
+			bot.Send(msg)
 		default:
 			fmt.Println("webhook", wh.ObjectKind)
 		}
