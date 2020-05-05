@@ -107,7 +107,7 @@ func server() {
 		case "merge_request":
 			msg := tgbotapi.NewMessage(
 				viper.GetInt64("chat.id"),
-				fmt.Sprintf("%s %s MR ![%d](%s) %s at %s",
+				fmt.Sprintf("%s %s MR \\![%d](%s) %s at %s",
 					wh.User.Username,
 					wh.ObjectAttributes.Action,
 					wh.ObjectAttributes.IID,
