@@ -77,6 +77,56 @@ type webhook struct {
 	ObjectAttributes *attributes `json:"object_attributes"`
 }
 
+func (wh *webhook) Notification() string {
+	switch wh.ObjectKind {
+	case "merge_request":
+		return wh.mrNotification()
+	case "issue":
+		return wh.issueNotification()
+	case "note":
+		return wh.commentNotification()
+	default:
+		fmt.Println("webhook", wh.ObjectKind)
+	}
+	return ""
+}
+
+func (wh *webhook) mrNotification() string {
+	switch wh.ObjectAttributes.Action {
+	case "open", "merge", "close":
+		return fmt.Sprintf("%s %s MR [\\!%d](%s) %s at %s",
+			wh.User.Username,
+			wh.ObjectAttributes.Action,
+			wh.ObjectAttributes.IID,
+			wh.ObjectAttributes.URL,
+			wh.ObjectAttributes.Title,
+			wh.Project.Path,
+		)
+	default:
+		return ""
+	}
+}
+
+func (wh *webhook) issueNotification() string {
+	switch wh.ObjectAttributes.Action {
+	case "open", "merge", "close":
+		return fmt.Sprintf("%s %s issue [\\#%d](%s) %s at %s",
+			wh.User.Username,
+			wh.ObjectAttributes.Action,
+			wh.ObjectAttributes.IID,
+			wh.ObjectAttributes.URL,
+			wh.ObjectAttributes.Title,
+			wh.Project.Path,
+		)
+	default:
+		return ""
+	}
+}
+
+func (wh *webhook) commentNotification() string {
+	return ""
+}
+
 func server() {
 	engine := gin.New()
 
@@ -103,26 +153,16 @@ func server() {
 			return
 		}
 
-		switch wh.ObjectKind {
-		case "merge_request":
+		if message := wh.Notification(); message != "" {
 			msg := tgbotapi.NewMessage(
 				viper.GetInt64("chat.id"),
-				fmt.Sprintf("%s %s MR \\![%d](%s) %s at %s",
-					wh.User.Username,
-					wh.ObjectAttributes.Action,
-					wh.ObjectAttributes.IID,
-					wh.ObjectAttributes.URL,
-					wh.ObjectAttributes.Title,
-					wh.Project.Path,
-				),
+				message,
 			)
 			msg.ParseMode = "MarkdownV2"
 			_, err := bot.Send(msg)
 			if err != nil {
 				fmt.Println("send message error", err)
 			}
-		default:
-			fmt.Println("webhook", wh.ObjectKind)
 		}
 
 		c.JSON(http.StatusOK, "")
