@@ -99,7 +99,7 @@ func server() {
 		}
 
 		if viper.GetInt64("chat.id") == 0 {
-			c.JSON(http.StatusOK, "")
+			c.JSON(http.StatusOK, gin.H{"message": "no chat id"})
 			return
 		}
 
