@@ -2,6 +2,9 @@
 //
 // webhook api document:
 // https://docs.gitlab.com/ce/user/project/integrations/webhooks.html
+//
+// telegram api document:
+// https://core.telegram.org/bots/api
 package main
 
 import (
@@ -94,13 +97,13 @@ func (wh *webhook) Notification() string {
 func (wh *webhook) mrNotification() string {
 	switch wh.ObjectAttributes.Action {
 	case "open", "merge", "close":
-		return fmt.Sprintf("%s %s MR [\\!%d](%s) %s at %s",
+		return fmt.Sprintf("%s %s MR [\\!%d](%s) \"%s\" at %s",
 			wh.User.Username,
 			wh.ObjectAttributes.Action,
 			wh.ObjectAttributes.IID,
 			wh.ObjectAttributes.URL,
-			wh.ObjectAttributes.Title,
-			wh.Project.Path,
+			markdownEscape(wh.ObjectAttributes.Title),
+			markdownEscape(wh.Project.Path),
 		)
 	default:
 		return ""
@@ -110,13 +113,13 @@ func (wh *webhook) mrNotification() string {
 func (wh *webhook) issueNotification() string {
 	switch wh.ObjectAttributes.Action {
 	case "open", "merge", "close":
-		return fmt.Sprintf("%s %s issue [\\#%d](%s) %s at %s",
+		return fmt.Sprintf("%s %s issue [\\#%d](%s) \"%s\" at %s",
 			wh.User.Username,
 			wh.ObjectAttributes.Action,
 			wh.ObjectAttributes.IID,
 			wh.ObjectAttributes.URL,
-			wh.ObjectAttributes.Title,
-			wh.Project.Path,
+			markdownEscape(wh.ObjectAttributes.Title),
+			markdownEscape(wh.Project.Path),
 		)
 	default:
 		return ""
@@ -127,8 +130,31 @@ func (wh *webhook) commentNotification() string {
 	return ""
 }
 
-func markdownV2Escape(s string) string {
-	return strings.ReplaceAll(s, "-", "\\-")
+// esc
+// '_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'
+// must be escaped with the preceding character '\'.`'
+func markdownEscape(s string) string {
+	replacer := strings.NewReplacer(
+		"_", "\\_",
+		"*", "\\*",
+		"[", "\\[",
+		"]", "\\]",
+		"(", "\\(",
+		")", "\\)",
+		"~", "\\~",
+		"`", "\\`",
+		">", "\\>",
+		"#", "\\#",
+		"+", "\\+",
+		"-", "\\-",
+		"=", "\\=",
+		"|", "\\|",
+		"{", "\\{",
+		"}", "\\}",
+		".", "\\.",
+		"!", "\\!",
+	)
+	return replacer.Replace(s)
 }
 
 func server() {
@@ -160,12 +186,12 @@ func server() {
 		if message := wh.Notification(); message != "" {
 			msg := tgbotapi.NewMessage(
 				viper.GetInt64("chat.id"),
-				markdownV2Escape(message),
+				message,
 			)
 			msg.ParseMode = "MarkdownV2"
 			_, err := bot.Send(msg)
 			if err != nil {
-				fmt.Println("send message error", err)
+				fmt.Println("Send message error", err, "|msg|", msg)
 			}
 		}
 
