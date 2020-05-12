@@ -64,20 +64,38 @@ type project struct {
 }
 
 type attributes struct {
-	ID     int    `json:"id"`
-	IID    int    `json:"iid"`
-	Title  string `json:"title"`
-	State  string `json:"state"`
-	URL    string `json:"url"`
-	Action string `json:"action"`
+	ID           int    `json:"id"`
+	Note         string `json:"note"`
+	NoteableType string `json:"noteable_type"`
+	IID          int    `json:"iid"`
+	Title        string `json:"title"`
+	State        string `json:"state"`
+	URL          string `json:"url"`
+	Action       string `json:"action"`
+}
+
+type mergeRequest struct {
+	ID    int    `json:"id"`
+	Title string `json:"title"`
+	State string `json:"state"`
+	IID   int    `json:"iid"`
+}
+
+type issue struct {
+	ID    int    `json:"id"`
+	Title string `json:"title"`
+	State string `json:"state"`
+	IID   int    `json:"iid"`
 }
 
 type webhook struct {
 	ObjectKind string `json:"object_kind"`
 
-	User             user
-	Project          project
-	ObjectAttributes *attributes `json:"object_attributes"`
+	User             user          `json:"user"`
+	Project          project       `json:"project"`
+	ObjectAttributes *attributes   `json:"object_attributes"`
+	MergeRequest     *mergeRequest `json:"merge_request"`
+	Issue            *issue        `json:"issue"`
 }
 
 func (wh *webhook) Notification() string {
@@ -127,7 +145,30 @@ func (wh *webhook) issueNotification() string {
 }
 
 func (wh *webhook) commentNotification() string {
-	return ""
+	switch wh.ObjectAttributes.NoteableType {
+	//case "Commit":
+	//return ""
+	case "MergeRequest":
+		return fmt.Sprintf("%s\ncomment [\\!%d](%s) \"%s\" at %s\n%s",
+			wh.User.Username,
+			wh.MergeRequest.IID,
+			wh.ObjectAttributes.URL,
+			markdownEscape(wh.MergeRequest.Title),
+			markdownEscape(wh.Project.Path),
+			markdownEscape(wh.ObjectAttributes.Note),
+		)
+	case "Issue":
+		return fmt.Sprintf("%s\ncomment [\\#%d](%s) \"%s\" at %s\n%s",
+			wh.User.Username,
+			wh.Issue.IID,
+			wh.ObjectAttributes.URL,
+			markdownEscape(wh.Issue.Title),
+			markdownEscape(wh.Project.Path),
+			markdownEscape(wh.ObjectAttributes.Note),
+		)
+	default:
+		return ""
+	}
 }
 
 // esc
