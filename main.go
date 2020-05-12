@@ -127,6 +127,10 @@ func (wh *webhook) commentNotification() string {
 	return ""
 }
 
+func markdownV2Escape(s string) string {
+	return strings.ReplaceAll(s, "-", "\\-")
+}
+
 func server() {
 	engine := gin.New()
 
@@ -156,7 +160,7 @@ func server() {
 		if message := wh.Notification(); message != "" {
 			msg := tgbotapi.NewMessage(
 				viper.GetInt64("chat.id"),
-				message,
+				markdownV2Escape(message),
 			)
 			msg.ParseMode = "MarkdownV2"
 			_, err := bot.Send(msg)
