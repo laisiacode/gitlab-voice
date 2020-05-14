@@ -150,7 +150,7 @@ func (wh *webhook) commentNotification() string {
 	//return ""
 	case "MergeRequest":
 		return fmt.Sprintf("%s\ncomment [\\!%d](%s) \"%s\" at %s\n%s",
-			wh.User.Username,
+			markdownEscape(wh.User.Username),
 			wh.MergeRequest.IID,
 			wh.ObjectAttributes.URL,
 			markdownEscape(wh.MergeRequest.Title),
@@ -159,7 +159,7 @@ func (wh *webhook) commentNotification() string {
 		)
 	case "Issue":
 		return fmt.Sprintf("%s\ncomment [\\#%d](%s) \"%s\" at %s\n%s",
-			wh.User.Username,
+			markdownEscape(wh.User.Username),
 			wh.Issue.IID,
 			wh.ObjectAttributes.URL,
 			markdownEscape(wh.Issue.Title),
