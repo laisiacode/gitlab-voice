@@ -115,8 +115,8 @@ func (wh *webhook) Notification() string {
 func (wh *webhook) mrNotification() string {
 	switch wh.ObjectAttributes.Action {
 	case "open", "merge", "close":
-		return fmt.Sprintf("%s %s MR [\\!%d](%s) \"%s\" at %s",
-			wh.User.Username,
+		return fmt.Sprintf("%s\n%s MR [\\!%d](%s) \"%s\" at %s",
+			markdownEscape(wh.User.Username),
 			wh.ObjectAttributes.Action,
 			wh.ObjectAttributes.IID,
 			wh.ObjectAttributes.URL,
@@ -131,8 +131,8 @@ func (wh *webhook) mrNotification() string {
 func (wh *webhook) issueNotification() string {
 	switch wh.ObjectAttributes.Action {
 	case "open", "merge", "close":
-		return fmt.Sprintf("%s %s issue [\\#%d](%s) \"%s\" at %s",
-			wh.User.Username,
+		return fmt.Sprintf("%s\n%s issue [\\#%d](%s) \"%s\" at %s",
+			markdownEscape(wh.User.Username),
 			wh.ObjectAttributes.Action,
 			wh.ObjectAttributes.IID,
 			wh.ObjectAttributes.URL,
