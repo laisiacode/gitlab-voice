@@ -38,6 +38,11 @@ type attributes struct {
 	State        string `json:"state"`
 	URL          string `json:"url"`
 	Action       string `json:"action"`
+
+	// pipeline
+	Ref      string `json:"ref"`
+	Status   string `json:"status"`
+	Duration int    `json:"duration"`
 }
 
 type mergeRequest struct {
@@ -65,6 +70,8 @@ func (wh *Webhook) Notification() string {
 		return wh.commentNotification()
 	case "tag_push":
 		return wh.tagPush()
+	case "pipeline":
+		return wh.pipeline()
 	default:
 		fmt.Println("webhook", wh.ObjectKind)
 	}
@@ -130,11 +137,24 @@ func (wh *Webhook) commentNotification() string {
 	}
 }
 
+// tag
+// doc: https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#tag-events
 func (wh *Webhook) tagPush() string {
 	return fmt.Sprintf("%s\npush new tag [%s](%s/-/tags) at %s",
 		markdownEscape(wh.UserUsername),
 		markdownEscape(wh.Ref),
 		markdownEscape(wh.Project.WebURL),
 		markdownEscape(wh.Project.Path),
+	)
+}
+
+// pipeline
+// doc: https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#tag-events
+func (wh *Webhook) pipeline() string {
+	return fmt.Sprintf("pipeline for %s is %s at %s\nduration: %d",
+		markdownEscape(wh.ObjectAttributes.Ref),
+		markdownEscape(wh.ObjectAttributes.Status),
+		markdownEscape(wh.Project.Path),
+		wh.ObjectAttributes.Duration,
 	)
 }
