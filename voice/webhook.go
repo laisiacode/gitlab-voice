@@ -133,8 +133,8 @@ func (wh *Webhook) commentNotification() string {
 func (wh *Webhook) tagPush() string {
 	return fmt.Sprintf("%s\npush new tag [%s](%s/-/tags) at %s",
 		markdownEscape(wh.UserUsername),
-		wh.Ref,
-		wh.Project.WebURL,
+		markdownEscape(wh.Ref),
+		markdownEscape(wh.Project.WebURL),
 		markdownEscape(wh.Project.Path),
 	)
 }
