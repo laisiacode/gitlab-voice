@@ -6,6 +6,10 @@ import "fmt"
 type Webhook struct {
 	ObjectKind string `json:"object_kind"`
 
+	Ref          string `json:"ref"`
+	UserName     string `json:"user_name"`
+	UserUsername string `json:"user_username"`
+
 	User             user          `json:"user"`
 	Project          project       `json:"project"`
 	ObjectAttributes *attributes   `json:"object_attributes"`
@@ -20,8 +24,9 @@ type user struct {
 }
 
 type project struct {
-	Path string `json:"path_with_namespace"`
-	URL  string `json:"url"`
+	WebURL string `json:"web_url"`
+	Path   string `json:"path_with_namespace"`
+	URL    string `json:"url"`
 }
 
 type attributes struct {
@@ -58,6 +63,8 @@ func (wh *Webhook) Notification() string {
 		return wh.issueNotification()
 	case "note":
 		return wh.commentNotification()
+	case "tag_push":
+		return wh.tagPush()
 	default:
 		fmt.Println("webhook", wh.ObjectKind)
 	}
@@ -121,4 +128,13 @@ func (wh *Webhook) commentNotification() string {
 	default:
 		return ""
 	}
+}
+
+func (wh *Webhook) tagPush() string {
+	return fmt.Sprintf("%s\npush new tag [%s](%s/-/tags) at %s",
+		markdownEscape(wh.UserUsername),
+		wh.Ref,
+		wh.Project.WebURL,
+		markdownEscape(wh.Project.Path),
+	)
 }
