@@ -154,10 +154,10 @@ func (wh *Webhook) pipeline() string {
 		}
 	}
 
-	return fmt.Sprintf("[pipeline for %s](%s/-/pipelines) is %s at %s\nduration: %d",
+	return fmt.Sprintf("pipeline is **%s** for [%s](%s/-/pipelines) at %s\nduration: %ds",
+		markdownEscape(wh.ObjectAttributes.Status),
 		markdownEscape(wh.ObjectAttributes.Ref),
 		markdownEscape(wh.Project.WebURL),
-		markdownEscape(wh.ObjectAttributes.Status),
 		markdownEscape(wh.Project.Path),
 		wh.ObjectAttributes.Duration,
 	)
