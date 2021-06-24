@@ -63,11 +63,11 @@ type issue struct {
 func (wh *Webhook) Notification() string {
 	switch wh.ObjectKind {
 	case "merge_request":
-		return wh.mrNotification()
+		return wh.mergeRequest()
 	case "issue":
-		return wh.issueNotification()
+		return wh.issue()
 	case "note":
-		return wh.commentNotification()
+		return wh.comment()
 	case "tag_push":
 		return wh.tagPush()
 	case "pipeline":
@@ -78,9 +78,9 @@ func (wh *Webhook) Notification() string {
 	return ""
 }
 
-func (wh *Webhook) mrNotification() string {
+func (wh *Webhook) mergeRequest() string {
 	switch wh.ObjectAttributes.Action {
-	case "open", "merge", "close":
+	case "open", "merge", "close", "approved":
 		return fmt.Sprintf("%s\n%s MR [\\!%d](%s) \"%s\" at %s",
 			markdownEscape(wh.User.Username),
 			wh.ObjectAttributes.Action,
@@ -94,7 +94,7 @@ func (wh *Webhook) mrNotification() string {
 	}
 }
 
-func (wh *Webhook) issueNotification() string {
+func (wh *Webhook) issue() string {
 	switch wh.ObjectAttributes.Action {
 	case "open", "merge", "close":
 		return fmt.Sprintf("%s\n%s issue [\\#%d](%s) \"%s\" at %s",
@@ -110,7 +110,7 @@ func (wh *Webhook) issueNotification() string {
 	}
 }
 
-func (wh *Webhook) commentNotification() string {
+func (wh *Webhook) comment() string {
 	switch wh.ObjectAttributes.NoteableType {
 	//case "Commit":
 	//return ""
