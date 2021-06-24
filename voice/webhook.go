@@ -110,27 +110,24 @@ func (wh *Webhook) issue() string {
 	}
 }
 
+// https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#comment-events
 func (wh *Webhook) comment() string {
 	switch wh.ObjectAttributes.NoteableType {
-	//case "Commit":
-	//return ""
 	case "MergeRequest":
-		return fmt.Sprintf("%s\ncomment [\\!%d](%s) \"%s\" at %s\n%s",
+		return fmt.Sprintf("%s\ncomment [\\!%d](%s) \"%s\" at %s",
 			markdownEscape(wh.User.Username),
 			wh.MergeRequest.IID,
 			wh.ObjectAttributes.URL,
 			markdownEscape(wh.MergeRequest.Title),
 			markdownEscape(wh.Project.Path),
-			markdownEscape(wh.ObjectAttributes.Note),
 		)
 	case "Issue":
-		return fmt.Sprintf("%s\ncomment [\\#%d](%s) \"%s\" at %s\n%s",
+		return fmt.Sprintf("%s\ncomment [\\#%d](%s) \"%s\" at %s",
 			markdownEscape(wh.User.Username),
 			wh.Issue.IID,
 			wh.ObjectAttributes.URL,
 			markdownEscape(wh.Issue.Title),
 			markdownEscape(wh.Project.Path),
-			markdownEscape(wh.ObjectAttributes.Note),
 		)
 	default:
 		return ""
