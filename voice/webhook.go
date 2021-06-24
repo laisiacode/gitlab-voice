@@ -138,7 +138,7 @@ func (wh *Webhook) commentNotification() string {
 }
 
 // tag
-// doc: https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#tag-events
+// https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#tag-events
 func (wh *Webhook) tagPush() string {
 	return fmt.Sprintf("%s\npush new tag [%s](%s/-/tags) at %s",
 		markdownEscape(wh.UserUsername),
@@ -149,8 +149,14 @@ func (wh *Webhook) tagPush() string {
 }
 
 // pipeline
-// doc: https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#tag-events
+// https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#pipeline-events
 func (wh *Webhook) pipeline() string {
+	for _, v := range []string{"pending", "running"} {
+		if wh.ObjectAttributes.Status == v {
+			return ""
+		}
+	}
+
 	return fmt.Sprintf("pipeline for %s is %s at %s\nduration: %d",
 		markdownEscape(wh.ObjectAttributes.Ref),
 		markdownEscape(wh.ObjectAttributes.Status),
