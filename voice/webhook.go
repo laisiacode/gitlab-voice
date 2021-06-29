@@ -154,11 +154,21 @@ func (wh *Webhook) pipeline() string {
 		}
 	}
 
-	return fmt.Sprintf("pipeline is **%s** for [%s](%s/-/pipelines) at %s\nduration: %ds",
+	return fmt.Sprintf("pipeline is %s**%s** for [%s](%s/-/pipelines) at %s\nduration: %ds",
+		pipelineStatusEmoji(wh.ObjectAttributes.Status),
 		markdownEscape(wh.ObjectAttributes.Status),
 		markdownEscape(wh.ObjectAttributes.Ref),
 		markdownEscape(wh.Project.WebURL),
 		markdownEscape(wh.Project.Path),
 		wh.ObjectAttributes.Duration,
 	)
+}
+
+func pipelineStatusEmoji(status string) string {
+	switch status {
+	case "failed":
+		return "⚠️"
+	default:
+		return ""
+	}
 }
