@@ -1,0 +1,27 @@
+stages:
+  - build
+  - release
+
+go-build:
+  image: golang:1.17
+  stage: build
+  before_script:
+    - go version
+  script:
+    - CGO_ENABLED=0 go build
+
+docker-image:
+  image: docker:20.10
+  stage: release
+  services:
+    - docker:20.10-dind
+  before_script:
+    - docker version
+    - docker login registry.gitlab.com -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
+  script:
+    - docker build -t registry.gitlab.com/laisiacode/gitlab-voice .
+    - docker push registry.gitlab.com/laisiacode/gitlab-voice
+  needs:
+    - go-build
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
