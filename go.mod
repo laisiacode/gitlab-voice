@@ -1,4 +1,4 @@
-module github.com/nebulosa-studio/gitlab-voice
+module gitlab.com/laisiacode/gitlab-voice
 
 go 1.17
 
