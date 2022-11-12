@@ -15,8 +15,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/nebulosa-studio/gitlab-voice/voice"
 	"github.com/spf13/viper"
+	"gitlab.com/laisiacode/gitlab-voice/voice"
 )
 
 var bot *tgbotapi.BotAPI
