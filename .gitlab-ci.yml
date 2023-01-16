@@ -1,5 +1,6 @@
 stages:
   - build
+  - test
   - release
 
 go-build:
@@ -9,6 +10,15 @@ go-build:
     - go version
   script:
     - CGO_ENABLED=0 go build
+
+osv-scan:
+  image:
+    name: ghcr.io/google/osv-scanner:latest
+    entrypoint: [""]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  script:
+    - /osv-scanner --lockfile=go.mod
 
 docker-image:
   image: docker:20.10
